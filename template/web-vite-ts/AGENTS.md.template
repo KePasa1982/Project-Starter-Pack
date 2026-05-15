@@ -1,0 +1,51 @@
+# {{PROJECT_TITLE}} — instructions for AI agents
+
+## Who the user is
+
+The **user** is the **designer / idea generator**. They must **not** be burdened with folder layout, backup architecture, or boilerplate decisions that agents can make.
+
+## Cursor rules (IDE — agents read these)
+
+**Always-on** rules under [`.cursor/rules/`](.cursor/rules/):
+
+- **[`user-project-standard.mdc`](.cursor/rules/user-project-standard.mdc)** — this app’s contract: user-first layout, git, lockfile, build, ideas files.
+- **[`karpathy-guidelines.mdc`](.cursor/rules/karpathy-guidelines.mdc)** — how to implement: surface assumptions, prefer simplicity, surgical diffs, verify before “done” ([multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills), MIT).
+- **[`github-setup-offer.mdc`](.cursor/rules/github-setup-offer.mdc)** — after bootstrap, send **Beat A** / **Beat B** from **`docs/HANDOFF_MESSAGES.md`** (premium first-run UX + GitHub **YES** / **NO**); follow **`docs/GITHUB_SETUP_WALKTHROUGH.md`** when **YES**.
+- **[`github-push-offer.mdc`](.cursor/rules/github-push-offer.mdc)** — after meaningful work, if **`origin`** exists, one-line offer to **commit and push**, **commit only**, or **skip**; never push without consent.
+
+For throwaway spikes where you want **minimal** agent friction, you may delete **`karpathy-guidelines.mdc`**; keep **`user-project-standard.mdc`** unless you replace it on purpose. Delete **`github-push-offer.mdc`** if you do not want push reminders.
+
+## Your job
+
+1. **Implement** what they ask in plain language.
+2. **Keep** this repo in a good state: meaningful **git commits**, **`package-lock.json`** committed with dependency changes, working **`npm run build`**, **README** accurate if commands change.
+3. **Help with Git remotes** when off-machine backup matters — use **[docs/INDUSTRY_STANDARD_VERSIONING.md](docs/INDUSTRY_STANDARD_VERSIONING.md)** (optional remote, push, credentials). For a **guided** first connection, use **[docs/GITHUB_SETUP_WALKTHROUGH.md](docs/GITHUB_SETUP_WALKTHROUGH.md)**. Never ask them to paste tokens or passwords into chat.
+4. **After bootstrap (two beats):** **Beat A** — first message: project created briefly + GitHub **YES** / **NO** only (no dev-server or idea-file dump). **Beat B** — after GitHub or **NO**: GitHub result if any, then **`npm run dev`**, **`Local:`** URL, invite what to build ([docs/GITHUB_SETUP_WALKTHROUGH.md](docs/GITHUB_SETUP_WALKTHROUGH.md) Phase 5). If **YES**, run the walkthrough **one phase at a time** before Beat B.
+5. **Capture** design intent in [`DESIGN.md`](DESIGN.md) and [`ideas/INBOX.md`](ideas/INBOX.md) when they dictate; use [`docs/`](docs/) for longer notes. Do not force them to edit Markdown themselves unless they want to.
+
+## Layout (do not reinvent casually)
+
+The starter pack already fixed the default shape for this repo:
+
+- `src/` — application code (TypeScript).
+- `public/` — static assets served as-is.
+- `docs/` — longer notes, not the primary idea inbox.
+- Root **`DESIGN.md`** and **`ideas/INBOX.md`** — the user’s idea layer.
+
+Do not ask the user where standard files should go — **this list decides**.
+
+## Versioning and backup (industry standard only)
+
+Use **Git** for all history. Add a **remote** on your host when off-machine backup matters. Keep **`package-lock.json`** committed whenever dependencies change. This repo may include a **CI workflow** from the template for automated install/build on supported hosts.
+
+Do **not** add custom per-save archive folders, hooks that bump **`package.json`** on every save, or parallel **code-history**-style trees to this project unless the user explicitly asks for a different workflow — this template follows normal Git practice only.
+
+Details: [docs/INDUSTRY_STANDARD_VERSIONING.md](docs/INDUSTRY_STANDARD_VERSIONING.md) (copied from the starter pack at bootstrap).
+
+## Before you hand off a task
+
+- [ ] `npm run build` passes.
+- [ ] No secrets committed (no real `.env` files).
+- [ ] The user knows **`npm run dev`** in a terminal (this project’s port is in **`vite.config.ts`**, assigned at bootstrap so it does not clash with other PSP apps), and where to jot ideas (`DESIGN.md`, `ideas/INBOX.md`) if relevant.
+- [ ] If they care about off-machine backup: they know about **`docs/INDUSTRY_STANDARD_VERSIONING.md`** (or you walked them through it).
+- [ ] If **`origin`** exists and there are unpushed commits or uncommitted changes they may want backed up: one-line **GitHub push offer** per [`github-push-offer.mdc`](.cursor/rules/github-push-offer.mdc) (unless they already declined this turn).

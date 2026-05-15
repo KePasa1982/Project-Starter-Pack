@@ -1,0 +1,24 @@
+---
+description: After meaningful work — offer to commit/push to GitHub when origin exists; never push without consent
+alwaysApply: true
+---
+
+# GitHub push offer (ongoing — child projects from Project Starter Pack)
+
+After **meaningful** work (a feature, fix, or when the user says **done** / **finished** / **end of session**), and **`git remote get-url origin`** succeeds:
+
+- End with **one short line** offering to update GitHub, e.g.  
+  > **GitHub:** say if you want me to **commit and push**, **commit only** (local), or **skip for now**.
+
+**Before offering:** run `npm run build` when you changed app code; do not offer push if the build fails unless the user only changed docs.
+
+**If they agree to push:** `git add -A`, commit with a short honest message, `git push` (use their existing branch; do not rename branches unless they ask). If push fails (auth, conflicts), explain and stop — **never** ask for tokens or passwords in chat.
+
+**Do not:**
+
+- Commit or push without the user agreeing in that turn.
+- Repeat the offer in the same chat unless there is **new** work or **new** unpushed commits.
+- Nag about push if **`origin`** is not configured (GitHub was never linked — off-machine backup is optional; see [docs/INDUSTRY_STANDARD_VERSIONING.md](docs/INDUSTRY_STANDARD_VERSIONING.md)).
+- Offer on every tiny edit or mid-task unless they asked.
+
+**First-time GitHub link** uses [github-setup-offer.mdc](github-setup-offer.mdc) and [docs/GITHUB_SETUP_WALKTHROUGH.md](docs/GITHUB_SETUP_WALKTHROUGH.md) — not this rule.

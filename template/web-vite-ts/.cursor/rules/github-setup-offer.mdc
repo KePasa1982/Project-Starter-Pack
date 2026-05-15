@@ -1,0 +1,26 @@
+---
+description: After bootstrap — premium Beat A/B handoff from docs/HANDOFF_MESSAGES.md; GitHub YES/NO
+alwaysApply: true
+---
+
+# GitHub setup offer (child projects from Project Starter Pack)
+
+## Beat A — first message after bootstrap
+
+Use the **Beat A** user template in **[`docs/HANDOFF_MESSAGES.md`](docs/HANDOFF_MESSAGES.md)** (copied into this project at bootstrap). Fill **`{{DISPLAY_TITLE}}`** and **`{{CHILD_FOLDER}}`** from bootstrap output.
+
+- Keep the **structure** (headings, tables, dividers, icons, copy-friendly code blocks).
+- **Do not** shorten Beat A to a plain paragraph — the first-run experience should feel premium and organized.
+- **Copy UX:** folder path in its **own** fenced block so Cursor’s **Copy** control works; tell the user to use **Copy** on that block once.
+- **Do not** in Beat A: `npm run dev`, `Local:` URL, `DESIGN.md` / `ideas/INBOX.md`, bootstrap author hints, or versioning doc links.
+
+**GitHub question** (inside the template): user replies **YES** or **NO**.
+
+- **NO** — Go to **Beat B** using [`docs/HANDOFF_MESSAGES.md`](docs/HANDOFF_MESSAGES.md) (skipped GitHub line).
+- **YES** — Run **[`docs/GITHUB_SETUP_WALKTHROUGH.md`](docs/GITHUB_SETUP_WALKTHROUGH.md)** phase by phase. Never commit tokens or PATs. Never ask for passwords or tokens in chat.
+
+## Beat B — after GitHub finishes or NO
+
+Use the **Beat B** user template in **[`docs/HANDOFF_MESSAGES.md`](docs/HANDOFF_MESSAGES.md)**. Fill placeholders; paste the correct **GitHub status** line (connected vs skipped).
+
+Then invite what to build. Ongoing push reminders: [`github-push-offer.mdc`](github-push-offer.mdc).

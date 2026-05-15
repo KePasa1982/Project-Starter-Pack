@@ -1,0 +1,78 @@
+# Production gate: py_compile, unit tests, template + generated project build,
+# brief headless `npm run dev` HTTP check, and npm fetch retries for flaky networks.
+name: Starter pack CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      # Mitigate transient registry / proxy failures (issue: npm network flakiness).
+      NPM_CONFIG_FETCH_RETRIES: "5"
+      NPM_CONFIG_FETCH_RETRY_MINTIMEOUT: "20000"
+      NPM_CONFIG_FETCH_RETRY_MAXTIMEOUT: "120000"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Bootstrap script (Python syntax)
+        run: python -m py_compile scripts/bootstrap_new_project.py
+
+      - name: Bootstrap helper unit tests
+        run: python -m unittest discover -s tests -p "test_*.py" -v
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Default template — install and build (lockfile committed)
+        working-directory: template/web-vite-ts
+        run: |
+          npm ci
+          npm run build
+
+      - name: Bootstrap smoke (build + headless dev server)
+        run: |
+          set -euo pipefail
+          DEST="${RUNNER_TEMP}/psp-ci-smoke-parent"
+          CHILD="${DEST}/psp-ci-smoke-test"
+          rm -rf "$CHILD"
+          mkdir -p "$DEST"
+          python scripts/bootstrap_new_project.py --title "CI Smoke" --slug psp-ci-smoke-test --dest "$DEST"
+          test -f "$CHILD/package-lock.json"
+          git -C "$CHILD" log -1 --oneline
+          (cd "$CHILD" && npm ci && npm run build)
+          cd "$CHILD"
+          npm run dev -- --host 127.0.0.1 --port 34174 --strictPort >"$DEST/vite-dev.log" 2>&1 &
+          echo $! >"$DEST/vite-dev.pid"
+          cd - >/dev/null
+          ok=0
+          for _ in {1..30}; do
+            if curl -sf "http://127.0.0.1:34174/" >/dev/null; then ok=1; break; fi
+            sleep 1
+          done
+          if [ "$ok" != 1 ]; then
+            echo "::group::vite dev log"
+            cat "$DEST/vite-dev.log" || true
+            echo "::endgroup::"
+            kill "$(cat "$DEST/vite-dev.pid")" 2>/dev/null || true
+            exit 1
+          fi
+          kill "$(cat "$DEST/vite-dev.pid")" 2>/dev/null || true
+          wait "$(cat "$DEST/vite-dev.pid")" 2>/dev/null || true
+          rm -rf "$CHILD"

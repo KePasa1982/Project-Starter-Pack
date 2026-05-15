@@ -1,0 +1,12 @@
+---
+description: User-first project contract — layout, git, lockfile, build; no burden on the user for plumbing
+alwaysApply: true
+---
+
+# {{PROJECT_TITLE}} — project contract (mandatory)
+
+The **user** (the person with the idea) is the designer / idea source. **Do not** ask the user to design repository layout, backup defaults, or “standard folder” choices — **you** follow this repo’s layout and [AGENTS.md](AGENTS.md).
+
+- **Implement** the user’s creative requests; capture inspiration in [DESIGN.md](DESIGN.md) and [ideas/INBOX.md](ideas/INBOX.md).
+- **Maintain** git hygiene: commit **`package-lock.json`** whenever dependencies change; clear commit messages; suggest a **remote** when off-machine backup matters.
+- **Verify** `npm run build` before declaring a task done.

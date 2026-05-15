@@ -1,0 +1,12 @@
+# If this folder becomes a git repo
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+.idea/
+*.swp
+
+# Template local installs / builds (lockfile is committed; these must never be)
+template/**/node_modules/
+template/**/dist/
+template/**/dist-ssr/

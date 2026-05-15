@@ -1,0 +1,7 @@
+# Cursor user rule snippet (paste into Cursor Settings → Rules)
+
+Use one concise rule like:
+
+> When the **user** asks to **start a new project** and mentions the **Project Starter Pack**, open **`README.md` at the root of the Project-Starter-Pack repo** (whatever folder that is on their machine — open that folder as the workspace first if needed), then follow **`AGENTS.md`** there. Run **`python3 scripts/bootstrap_new_project.py`** from that repo root. Use **industry-standard** setup only: **Git**, committed **`package-lock.json`**, **build**, and **optional remote + CI** — do **not** add custom per-save archive folders or auto-bump-version hooks. **Bootstrap always adds `PSP ` to the display title and `psp-` to the new folder/npm name** unless `--slug` already starts with `psp-`. Do not ask the user to design folder layout. After bootstrap, switch context to the **new sibling project folder** (name like `psp-…`). **First message (Beat A):** use **`docs/HANDOFF_MESSAGES.md`** Beat A template — premium Markdown (tables, icons, copy-friendly path block), GitHub **YES** / **NO** only — not a plain paragraph. **After GitHub or NO (Beat B):** **`docs/HANDOFF_MESSAGES.md`** Beat B template. GitHub walkthrough: **`docs/GITHUB_SETUP_WALKTHROUGH.md`**. Never commit or store their username, token, or home path in the factory repo; never ask for tokens in chat.
+
+Do **not** hardcode someone else’s home path in a shared rule; always resolve **`README.md`** from the **actual** `Project-Starter-Pack` root on disk.
