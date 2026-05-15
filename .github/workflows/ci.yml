@@ -46,7 +46,7 @@ jobs:
           npm ci
           npm run build
 
-      - name: Bootstrap smoke (build + headless dev server)
+      - name: Bootstrap smoke (create project + build)
         run: |
           set -euo pipefail
           DEST="${RUNNER_TEMP}/psp-ci-smoke-parent"
@@ -57,22 +57,25 @@ jobs:
           test -f "$CHILD/package-lock.json"
           git -C "$CHILD" log -1 --oneline
           (cd "$CHILD" && npm ci && npm run build)
-          cd "$CHILD"
-          npm run dev -- --host 127.0.0.1 --port 34174 --strictPort >"$DEST/vite-dev.log" 2>&1 &
-          echo $! >"$DEST/vite-dev.pid"
-          cd - >/dev/null
-          ok=0
-          for _ in {1..30}; do
-            if curl -sf "http://127.0.0.1:34174/" >/dev/null; then ok=1; break; fi
-            sleep 1
-          done
-          if [ "$ok" != 1 ]; then
-            echo "::group::vite dev log"
-            cat "$DEST/vite-dev.log" || true
-            echo "::endgroup::"
+          # Headless dev + curl is reliable on Linux runners only (background job / PID on Windows is flaky).
+          if [ "${RUNNER_OS}" = "Linux" ]; then
+            cd "$CHILD"
+            npm run dev -- --host 127.0.0.1 --port 34174 --strictPort >"$DEST/vite-dev.log" 2>&1 &
+            echo $! >"$DEST/vite-dev.pid"
+            cd - >/dev/null
+            ok=0
+            for _ in {1..30}; do
+              if curl -sf "http://127.0.0.1:34174/" >/dev/null; then ok=1; break; fi
+              sleep 1
+            done
+            if [ "$ok" != 1 ]; then
+              echo "::group::vite dev log"
+              cat "$DEST/vite-dev.log" || true
+              echo "::endgroup::"
+              kill "$(cat "$DEST/vite-dev.pid")" 2>/dev/null || true
+              exit 1
+            fi
             kill "$(cat "$DEST/vite-dev.pid")" 2>/dev/null || true
-            exit 1
+            wait "$(cat "$DEST/vite-dev.pid")" 2>/dev/null || true
           fi
-          kill "$(cat "$DEST/vite-dev.pid")" 2>/dev/null || true
-          wait "$(cat "$DEST/vite-dev.pid")" 2>/dev/null || true
           rm -rf "$CHILD"

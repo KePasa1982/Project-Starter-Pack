@@ -11,7 +11,7 @@ This repo is the **factory**: templates, bootstrap script, and documentation. Ch
    `rm -rf "$DEST/psp-ci-smoke-test" && mkdir -p "$DEST" && python scripts/bootstrap_new_project.py --title "Smoke" --slug psp-ci-smoke-test --dest "$DEST"`  
    then `cd "$DEST/psp-ci-smoke-test" && npm ci && npm run build`, then the same **headless dev check** CI uses (from repo root: `cd` into the child, `npm run dev -- --host 127.0.0.1 --port 34174 --strictPort` in background, `curl -sf http://127.0.0.1:34174/`, kill PID), then remove the folder.
 
-CI runs **Linux and Windows** (see `.github/workflows/ci.yml`): `py_compile`, unit tests, template **`npm ci` + `npm run build`**, bootstrap under **`RUNNER_TEMP`**, then **`npm ci` + `npm run build`** plus a **short headless `npm run dev`** check (curl to `127.0.0.1:34174`) before teardown.
+CI runs **Linux and Windows** (see `.github/workflows/ci.yml`): `py_compile`, unit tests, template **`npm ci` + `npm run build`**, bootstrap under **`RUNNER_TEMP`**, then **`npm ci` + `npm run build`** in the child. A **short headless `npm run dev` + curl** check (`127.0.0.1:34174`) runs on **Linux** only; Windows skips that step (background dev jobs are flaky there) but still runs the full bootstrap smoke through build.
 
 **npm / network:** CI sets **`NPM_CONFIG_FETCH_RETRIES`** (and related npm env vars) so transient registry failures are retried automatically.
 
