@@ -15,6 +15,21 @@ from pathlib import Path
 STARTER_ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE = STARTER_ROOT / "template" / "web-vite-ts"
 
+
+def _tool_exe(name: str) -> str:
+    """Resolve a CLI on PATH (on Windows, ``npm`` is ``npm.cmd`` — needs ``shutil.which``)."""
+    path = shutil.which(name)
+    if not path:
+        raise FileNotFoundError(
+            f"{name!r} not found on PATH. Install it and try again "
+            f"(bootstrap needs git and npm)."
+        )
+    return path
+
+
+def _argv(tool: str, *args: str) -> list[str]:
+    return [_tool_exe(tool), *args]
+
 # Every PSP project is labeled so the user can spot them next to other folders and in the UI.
 PSP_DISPLAY_PREFIX = "PSP "
 PSP_SLUG_PREFIX = "psp-"
@@ -321,7 +336,7 @@ def main() -> int:
     )
 
     try:
-        subprocess.run(["git", "init"], cwd=target, check=True, capture_output=True, text=True)
+        subprocess.run(_argv("git", "init"), cwd=target, check=True, capture_output=True, text=True)
         print("[bootstrap] git init: ok", flush=True)
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         print(f"[bootstrap] error: git init failed ({e}). Install git and retry.", file=sys.stderr)
@@ -332,7 +347,7 @@ def main() -> int:
         return 1
 
     try:
-        subprocess.run(["npm", "install"], cwd=target, check=True)
+        subprocess.run(_argv("npm", "install"), cwd=target, check=True)
         print("[bootstrap] npm install: ok", flush=True)
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         print(f"[bootstrap] error: npm install failed ({e}).", file=sys.stderr)
@@ -340,7 +355,7 @@ def main() -> int:
         return 1
 
     try:
-        subprocess.run(["npm", "run", "build"], cwd=target, check=True)
+        subprocess.run(_argv("npm", "run", "build"), cwd=target, check=True)
         print("[bootstrap] npm run build: ok", flush=True)
     except subprocess.CalledProcessError as e:
         print(f"[bootstrap] error: npm run build failed ({e}). Fix the template before handoff.", file=sys.stderr)
@@ -348,10 +363,10 @@ def main() -> int:
         return 1
 
     try:
-        subprocess.run(["git", "add", "-A"], cwd=target, check=True, capture_output=True, text=True)
+        subprocess.run(_argv("git", "add", "-A"), cwd=target, check=True, capture_output=True, text=True)
         # One-shot author so the first commit succeeds even when global git user.name/email is unset.
         commit = subprocess.run(
-            [
+            _argv(
                 "git",
                 "-c",
                 "user.name=Project Starter Pack bootstrap",
@@ -360,7 +375,7 @@ def main() -> int:
                 "commit",
                 "-m",
                 "chore: initial project from Project Starter Pack",
-            ],
+            ),
             cwd=target,
             capture_output=True,
             text=True,

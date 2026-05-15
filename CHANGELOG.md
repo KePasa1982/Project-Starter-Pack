@@ -4,6 +4,7 @@ All notable changes to **Project Starter Pack** (the factory repo) are summarize
 
 ## [Unreleased]
 
+- **Windows CI:** bootstrap resolves `git` / `npm` via `shutil.which` so `npm install` works when GitHub Actions runs Python on `windows-latest`.
 - **Third-party attribution:** **[docs/THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md)** for `karpathy-guidelines.mdc` (multica-ai/andrej-karpathy-skills, MIT); README section; copied to each child at bootstrap.
 - **GitHub-ready factory:** removed local `template/**/node_modules` and `dist` artifacts; **[docs/PLATFORMS.md](docs/PLATFORMS.md)** (Linux / macOS / Windows prerequisites); **[docs/PUBLISHING.md](docs/PUBLISHING.md)** (maintainer checklist for first push); README platform pointer; privacy unit test **`TestFactoryRepoPrivacy`**; `.gitignore` adds `Thumbs.db`. Template **`vite.config.ts`** uses numeric port **5200** for factory **`npm run build`** / CI; bootstrap **`patch_vite_dev_port`** assigns each child’s unique port.
 - **Premium bootstrap handoff:** **[docs/HANDOFF_MESSAGES.md](docs/HANDOFF_MESSAGES.md)** — Beat A/B user templates (checklist tables, dividers, icons, copy-friendly code blocks for path and `npm run dev`). Copied to each child at bootstrap; **`github-setup-offer.mdc`**, factory **AGENTS.md**, **README**, **WORKFLOW**, **GITHUB_SETUP_WALKTHROUGH**, **starter-pack-bootstrap**, **CURSOR_USER_RULE_SNIPPET** updated. Cursor **Copy** on fenced blocks — no fake HTML buttons.

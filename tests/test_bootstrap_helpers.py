@@ -25,6 +25,14 @@ def _load_bootstrap():
 b = _load_bootstrap()
 
 
+class TestToolResolution(unittest.TestCase):
+    def test_tool_exe_resolves_npm_and_git(self) -> None:
+        for name in ("npm", "git"):
+            path = b._tool_exe(name)
+            self.assertTrue(path)
+            self.assertEqual(b._argv(name, "--version")[0], path)
+
+
 class TestSlugAndTitle(unittest.TestCase):
     def test_slug_is_valid(self) -> None:
         self.assertTrue(b.slug_is_valid("a"))
