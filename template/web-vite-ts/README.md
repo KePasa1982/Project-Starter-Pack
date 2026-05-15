@@ -12,7 +12,7 @@ npm run build     # typecheck + production bundle
 npm run preview   # preview production build
 ```
 
-**Dev preview:** `npm run dev` uses port **{{DEV_PORT}}** (chosen at bootstrap so multiple PSP projects do not fight over `5173`). Vite opens that URL automatically in Cursor or your browser. On SSH-only machines, set **`server.open: false`** in **`vite.config.ts`**.
+**Dev preview:** `npm run dev` uses port **{{DEV_PORT}}** (chosen at bootstrap so multiple PSP projects do not fight over `5173`). Vite tries to open **`http://127.0.0.1:{{DEV_PORT}}/`** in your browser or Cursor. If nothing opens (common on first Windows run — allow **Node.js** in the firewall, then paste the **Local:** URL from the terminal). On SSH-only machines, set **`server.open: false`** in **`vite.config.ts`**.
 
 ## For the user
 

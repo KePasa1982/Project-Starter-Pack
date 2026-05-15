@@ -126,7 +126,7 @@ cd "{{CHILD_FOLDER}}" && npm run dev
 | **Primary** | {{LOCAL_URL}} |
 | **Alternate** | http://127.0.0.1:{{DEV_PORT}} |
 
-*Vite may open the browser automatically. Each PSP project uses its own port so nothing fights over `5173`.*
+*Vite tries to open **`http://127.0.0.1:{{DEV_PORT}}/`** automatically. Each PSP project uses its own port so nothing fights over `5173`. **Windows:** if nothing opens, allow **Node.js** in the firewall when prompted, then paste the **Local:** URL from the terminal.*
 
 ---
 

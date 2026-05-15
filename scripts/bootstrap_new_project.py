@@ -37,6 +37,7 @@ PSP_SLUG_PREFIX = "psp-"
 _SLUG_FULLMATCH = re.compile(r"[a-z0-9][a-z0-9-]{0,62}[a-z0-9]|[a-z0-9]")
 _VITE_PORT_RE = re.compile(r"port:\s*(\d+)", re.MULTILINE)
 _VITE_PORT_ASSIGN_RE = re.compile(r"(port:\s*)(\d+)(\s*,)")
+_VITE_OPEN_ASSIGN_RE = re.compile(r'open:\s*"http://127\.0\.0\.1:\d+/"')
 
 # Dev ports for PSP children (avoid Vite default 5173 so multiple projects do not collide in Cursor).
 DEV_PORT_MIN = 5200
@@ -224,7 +225,7 @@ def _materialize_project_tree(target: Path, title: str, slug: str, dev_port: int
     if agents_tpl.is_file():
         agents_tpl.rename(target / "AGENTS.md")
     apply_placeholders(target, title, slug, dev_port)
-    patch_vite_dev_port(target, dev_port)
+    patch_vite_dev_server(target, dev_port)
     dest_docs = target / "docs"
     dest_docs.mkdir(parents=True, exist_ok=True)
     for name in (
@@ -257,15 +258,23 @@ def _materialize_with_cleanup(target: Path, title: str, slug: str, dev_port: int
     return True
 
 
-def patch_vite_dev_port(target: Path, dev_port: int) -> None:
-    """Set the Vite dev server port in the child ``vite.config.ts``."""
+def vite_dev_open_url(dev_port: int) -> str:
+    return f"http://127.0.0.1:{dev_port}/"
+
+
+def patch_vite_dev_server(target: Path, dev_port: int) -> None:
+    """Set Vite dev port and browser-open URL in the child ``vite.config.ts``."""
     vite = target / "vite.config.ts"
     if not vite.is_file():
         return
     raw = vite.read_text(encoding="utf-8")
-    new, count = _VITE_PORT_ASSIGN_RE.subn(rf"\g<1>{dev_port}\g<3>", raw, count=1)
-    if count != 1:
+    new, port_count = _VITE_PORT_ASSIGN_RE.subn(rf"\g<1>{dev_port}\g<3>", raw, count=1)
+    if port_count != 1:
         sys.exit(f"Could not patch dev port in {vite}")
+    open_url = vite_dev_open_url(dev_port)
+    new, open_count = _VITE_OPEN_ASSIGN_RE.subn(f'open: "{open_url}"', new, count=1)
+    if open_count != 1:
+        sys.exit(f"Could not patch dev open URL in {vite}")
     vite.write_text(new, encoding="utf-8")
 
 
@@ -404,7 +413,7 @@ def main() -> int:
     print(f"  Display title: {title}")
     print(
         f"  Dev URL (after Beat B): http://localhost:{dev_port} "
-        f"(http://127.0.0.1:{dev_port} works too) — npm run dev opens in Cursor when server.open is true"
+        f"(http://127.0.0.1:{dev_port} works too) — npm run dev opens {vite_dev_open_url(dev_port)} when server.open is set"
     )
     print("  First reply (Beat A): docs/HANDOFF_MESSAGES.md — premium template + GitHub YES/NO only.")
     print("  After GitHub YES or NO (Beat B): docs/HANDOFF_MESSAGES.md — then invite to build.")

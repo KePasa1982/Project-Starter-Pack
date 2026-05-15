@@ -10,7 +10,8 @@ export default defineConfig({
     // Listen on all local interfaces so http://localhost:PORT and http://127.0.0.1:PORT both work
     // (default "localhost" alone can bind IPv6-only on some Linux setups).
     host: true,
-    // Opens the preview in Cursor / your browser on desktop. Set to false for SSH-only workflows.
-    open: true,
+    // Explicit local URL (with host: true, a bare boolean open can pick the wrong address on some setups).
+    // Bootstrap rewrites the port per project. Set to false for SSH-only workflows.
+    open: "http://127.0.0.1:5200/",
   },
 });

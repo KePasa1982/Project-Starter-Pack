@@ -136,10 +136,27 @@ class TestViteDevServerHost(unittest.TestCase):
         vite = (_ROOT / "template" / "web-vite-ts" / "vite.config.ts").read_text(encoding="utf-8")
         self.assertIn("host: true", vite)
 
+    def test_template_opens_explicit_local_url(self) -> None:
+        vite = (_ROOT / "template" / "web-vite-ts" / "vite.config.ts").read_text(encoding="utf-8")
+        self.assertRegex(vite, r'open:\s*"http://127\.0\.0\.1:5200/"')
+
     def test_template_vite_config_is_valid_typescript_for_ci(self) -> None:
         vite = (_ROOT / "template" / "web-vite-ts" / "vite.config.ts").read_text(encoding="utf-8")
         self.assertNotIn("{{DEV_PORT}}", vite)
         self.assertRegex(vite, r"port:\s*\d+")
+
+    def test_patch_vite_dev_server_updates_port_and_open(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            target = Path(td)
+            vite = target / "vite.config.ts"
+            vite.write_text(
+                (_ROOT / "template" / "web-vite-ts" / "vite.config.ts").read_text(encoding="utf-8"),
+                encoding="utf-8",
+            )
+            b.patch_vite_dev_server(target, 5432)
+            text = vite.read_text(encoding="utf-8")
+            self.assertRegex(text, r"port:\s*5432")
+            self.assertRegex(text, r'open:\s*"http://127\.0\.0\.1:5432/"')
 
 
 class TestChildTemplateCursorRules(unittest.TestCase):

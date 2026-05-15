@@ -4,6 +4,7 @@ All notable changes to **Project Starter Pack** (the factory repo) are summarize
 
 ## [Unreleased]
 
+- **Windows dev preview:** template **`server.open`** uses explicit **`http://127.0.0.1:PORT/`** (bootstrap patches port + URL); **[docs/PLATFORMS.md](docs/PLATFORMS.md)** first-run table (firewall, manual URL); Beat B handoff + child README note; **[docs/UPGRADE_NOTES_CHILD_PROJECTS.md](docs/UPGRADE_NOTES_CHILD_PROJECTS.md)** for existing children.
 - **Windows CI:** bootstrap resolves `git` / `npm` via `shutil.which`; headless `npm run dev` + curl smoke runs on **Linux** only (Windows still runs bootstrap + `npm ci` + `npm run build`).
 - **Third-party attribution:** **[docs/THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md)** for `karpathy-guidelines.mdc` (multica-ai/andrej-karpathy-skills, MIT); README section; copied to each child at bootstrap.
 - **GitHub-ready factory:** removed local `template/**/node_modules` and `dist` artifacts; **[docs/PLATFORMS.md](docs/PLATFORMS.md)** (Linux / macOS / Windows prerequisites); **[docs/PUBLISHING.md](docs/PUBLISHING.md)** (maintainer checklist for first push); README platform pointer; privacy unit test **`TestFactoryRepoPrivacy`**; `.gitignore` adds `Thumbs.db`. Template **`vite.config.ts`** uses numeric port **5200** for factory **`npm run build`** / CI; bootstrap **`patch_vite_dev_port`** assigns each child’s unique port.

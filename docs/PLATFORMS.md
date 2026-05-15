@@ -37,7 +37,19 @@ By default, bootstrap creates a **sibling folder** next to `Project-Starter-Pack
 |----|--------|
 | **Linux** | Full support. If `http://localhost:PORT` fails but `http://127.0.0.1:PORT` works, the template’s `server.host: true` in `vite.config.ts` is already set for that case. |
 | **macOS** | Same as Linux for bootstrap and Vite. Install Git via Xcode Command Line Tools or Homebrew if needed. |
-| **Windows** | Use **Git for Windows** for `git` in PowerShell or **Git Bash**. CI runs the same bash smoke tests as Linux. Long paths: keep project folders reasonably short if you hit path limits. Antivirus can lock `node_modules` during bootstrap — close editors on a half-finished `psp-…` folder and retry if cleanup fails. |
+| **Windows** | Use **Git for Windows** for `git` in PowerShell or **Git Bash**. CI runs the same bash smoke tests as Linux. Long paths: keep project folders reasonably short if you hit path limits. Antivirus can lock `node_modules` during bootstrap — close editors on a half-finished `psp-…` folder and retry if cleanup fails. See **First `npm run dev` on Windows** below. |
+
+### First `npm run dev` on Windows
+
+New **`psp-…`** projects set **`server.open`** to **`http://127.0.0.1:PORT/`** (your port is in `vite.config.ts` and the terminal **Local:** line). The dev server can work even when the browser does not open automatically.
+
+| What you see | What to do |
+|--------------|------------|
+| Windows Firewall asks to allow **Node.js** | Choose **Allow** (private network is enough for localhost). Then run **`npm run dev`** again or open the URL manually. |
+| Terminal shows **Local:** but no browser tab | Copy **`http://127.0.0.1:PORT/`** from the terminal (or your project README port) into Edge, Chrome, or Cursor’s browser panel. |
+| Page will not load | Confirm the dev server is still running; try **`http://localhost:PORT/`** as well. |
+
+Auto-open cannot be guaranteed on every PC (firewall, antivirus, corporate policy). The project is fine if **`npm run build`** passed at bootstrap — opening the preview URL by hand is normal.
 
 ## Child projects (after bootstrap)
 
