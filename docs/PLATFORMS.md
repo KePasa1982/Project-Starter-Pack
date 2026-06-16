@@ -51,6 +51,31 @@ New **`psp-…`** projects set **`server.open`** to **`http://127.0.0.1:PORT/`**
 
 Auto-open cannot be guaranteed on every PC (firewall, antivirus, corporate policy). The project is fine if **`npm run build`** passed at bootstrap — opening the preview URL by hand is normal.
 
+### Windows terminal commands
+
+Cursor’s integrated terminal on Windows often defaults to **Windows PowerShell 5**, which **does not** support chaining with `&&` (that works in **PowerShell 7+**, **Git Bash**, and macOS/Linux).
+
+**Prefer one command per line** — copy-friendly and works in every shell:
+
+```powershell
+cd "D:\path\to\psp-your-project"
+npm run dev
+```
+
+```powershell
+cd "D:\path\to\psp-your-project"
+npm run build
+git add -A
+git commit -m "Your message"
+git push
+```
+
+| Error | Fix |
+|-------|-----|
+| `The token '&&' is not a valid statement separator` | Split the chain into separate lines (above), or install [PowerShell 7](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows) / use **Git Bash**. |
+
+Agents and handoff templates in this pack follow this rule — see **[HANDOFF_MESSAGES.md](HANDOFF_MESSAGES.md)** and **[GITHUB_SETUP_WALKTHROUGH.md](GITHUB_SETUP_WALKTHROUGH.md)**.
+
 ## Child projects (after bootstrap)
 
 Each new **`psp-…`** app is a normal **Vite + TypeScript** web project: `npm run dev`, `npm run build`, optional GitHub CI from the template. No extra platform-specific pack changes are required for end users beyond installing the tools above.

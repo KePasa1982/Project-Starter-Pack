@@ -12,6 +12,7 @@ Use the **Beat A** user template in **[`docs/HANDOFF_MESSAGES.md`](docs/HANDOFF_
 - Keep the **structure** (headings, tables, dividers, icons, copy-friendly code blocks).
 - **Do not** shorten Beat A to a plain paragraph — the first-run experience should feel premium and organized.
 - **Copy UX:** folder path in its **own** fenced block so Cursor’s **Copy** control works; tell the user to use **Copy** on that block once.
+- **Windows:** command blocks use **one command per line** in a `powershell` fence — **never** `&&` (fails in Windows PowerShell 5). See factory **`docs/PLATFORMS.md`** and **`docs/GITHUB_SETUP_WALKTHROUGH.md`**.
 - **Do not** in Beat A: `npm run dev`, `Local:` URL, `DESIGN.md` / `ideas/INBOX.md`, bootstrap author hints, or versioning doc links.
 
 **GitHub question** (inside the template): user replies **YES** or **NO**.

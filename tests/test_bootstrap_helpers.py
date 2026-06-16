@@ -224,6 +224,15 @@ class TestHandoffMessages(unittest.TestCase):
         self.assertIn("Beat B", text)
         self.assertIn("{{CHILD_FOLDER}}", text)
         self.assertIn("Copy", text)
+        self.assertIn("one command per line", text.lower())
+        self.assertNotIn('cd "{{CHILD_FOLDER}}" && npm run dev', text)
+
+    def test_walkthrough_avoids_windows_and_chain_in_phase4(self) -> None:
+        path = _ROOT / "docs" / "GITHUB_SETUP_WALKTHROUGH.md"
+        text = path.read_text(encoding="utf-8")
+        self.assertIn("Windows PowerShell 5", text)
+        self.assertIn("one command per line", text.lower())
+        self.assertIn("&&' is not a valid statement separator", text)
 
     def test_github_setup_offer_points_at_handoff_doc(self) -> None:
         rule = _ROOT / "template" / "web-vite-ts" / ".cursor" / "rules" / "github-setup-offer.mdc"

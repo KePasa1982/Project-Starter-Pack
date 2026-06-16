@@ -4,6 +4,7 @@ All notable changes to **Project Starter Pack** (the factory repo) are summarize
 
 ## [Unreleased]
 
+- **Windows terminal commands:** handoff and GitHub walkthrough use **one command per line** in `powershell` blocks (no `&&` — fixes Windows PowerShell 5 parse errors). **[docs/PLATFORMS.md](docs/PLATFORMS.md)** *Windows terminal commands* table; **`github-setup-offer.mdc`** agent rule; Phase 4 troubleshooting for `&&` errors.
 - **Windows dev preview:** template **`server.open`** uses explicit **`http://127.0.0.1:PORT/`** (bootstrap patches port + URL); **[docs/PLATFORMS.md](docs/PLATFORMS.md)** first-run table (firewall, manual URL); Beat B handoff + child README note; **[docs/UPGRADE_NOTES_CHILD_PROJECTS.md](docs/UPGRADE_NOTES_CHILD_PROJECTS.md)** for existing children.
 - **Windows CI:** bootstrap resolves `git` / `npm` via `shutil.which`; headless `npm run dev` + curl smoke runs on **Linux** only (Windows still runs bootstrap + `npm ci` + `npm run build`).
 - **Third-party attribution:** **[docs/THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md)** for `karpathy-guidelines.mdc` (multica-ai/andrej-karpathy-skills, MIT); README section; copied to each child at bootstrap.

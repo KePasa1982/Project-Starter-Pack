@@ -27,6 +27,17 @@ When you have just finished bootstrap, send **Beat A** only — use the **Beat A
 
 **Tone:** “I’ll tell you the next command; paste the output if something looks wrong.” The user should not plan *how* — you do.
 
+### Windows shell (mandatory for agents)
+
+| Shell | Chain commands? | What to give the user |
+|-------|-----------------|------------------------|
+| **PowerShell 5** (Windows default) | **No** — `&&` is a parse error | **One command per line** in a `powershell` fenced block |
+| **PowerShell 7+** | Yes (`&&` works) | Still prefer **one command per line** (same block works everywhere) |
+| **Git Bash** on Windows | Yes (`&&` works) | Multi-line is fine; `&&` only if you label the block `bash` |
+| **macOS / Linux** | Yes | Multi-line is fine; `&&` optional |
+
+**Never** paste `cd "…" && npm run …` or `… && git push` for a Windows user in PowerShell without splitting lines. See **[PLATFORMS.md](PLATFORMS.md)** — *Windows terminal commands*.
+
 ---
 
 ## Phase 0 — Discover current state (child project folder)
@@ -153,10 +164,11 @@ git push -u origin BRANCH
 
 1. Make a tiny visible change (e.g. one line in `src/main.ts` or README).
 2. `npm run build` (template standard).
-3. Commit and push:
+3. Commit and push (one command per line — required on **Windows PowerShell 5**):
 
-```bash
+```powershell
 cd <CHILD_PROJECT_FOLDER>
+npm run build
 git add -A
 git commit -m "Test: verify GitHub push from local dev"
 git push
@@ -164,13 +176,15 @@ git push
 
 Success: remote shows new commit. If push fails, → Troubleshooting.
 
+**PowerShell 5:** if the user pasted a one-liner with `&&`, they see `The token '&&' is not a valid statement separator` — give them the multi-line block above.
+
 ---
 
 ## Phase 5 — Ready to build (Beat B — user-facing)
 
 Send this **after** GitHub setup completes (**YES** path) **or** the user declines (**NO**). This is the **only** place to mention local dev in the bootstrap flow.
 
-Use the **Beat B** user template in **[HANDOFF_MESSAGES.md](HANDOFF_MESSAGES.md)** — fill placeholders; paste the correct **GitHub status** line (connected vs skipped). Keep tables, dividers, and **copy-friendly** code blocks (folder path; `cd … && npm run dev` in its own block).
+Use the **Beat B** user template in **[HANDOFF_MESSAGES.md](HANDOFF_MESSAGES.md)** — fill placeholders; paste the correct **GitHub status** line (connected vs skipped). Keep tables, dividers, and **copy-friendly** code blocks (folder path; `cd` + `npm run dev` as **separate lines** in a `powershell` block — never `&&` for Windows users).
 
 Do **not** repeat bootstrap author / amend instructions unless they ask.
 
@@ -184,6 +198,7 @@ Do **not** repeat bootstrap author / amend instructions unless they ask.
 
 | Symptom | Action |
 |---------|--------|
+| `The token '&&' is not a valid statement separator` | User is on **PowerShell 5** — replace any `&&` chain with **separate lines** (block above). |
 | `could not read Username` / auth failed | PAT expired or wrong; create new token; ensure `credential.helper store` if they want HTTPS remembered |
 | `remote origin already exists` | `git remote set-url origin …` |
 | `rejected (fetch first)` | `git pull --rebase` then `git push` |

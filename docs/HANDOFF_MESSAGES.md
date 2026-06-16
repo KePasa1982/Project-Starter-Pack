@@ -15,6 +15,8 @@
 
 **Copy UX rule:** anything the user might paste (folder path, shell commands) goes in its **own** fenced block — **nothing else in that block**. Tell them once: *Use **Copy** on the code block.*
 
+**Windows shell rule:** **Windows PowerShell 5** (default in Cursor on Windows) does **not** support `&&`. User-facing command blocks must use **one command per line** (works in PowerShell 5, PowerShell 7+, Git Bash, and macOS/Linux shells). Do **not** chain with `&&` unless you know the user is in **Git Bash** and you label it as such.
+
 **Tone:** confident, warm, premium product — not cheesy, not a wall of text. Beat A = **one** message. Beat B = **one** message after GitHub YES or NO.
 
 ---
@@ -113,11 +115,14 @@ Your work is already saved **locally with Git**.
 {{CHILD_FOLDER}}
 ```
 
-**2.** Start the dev server — **Copy** and run in your terminal:
+**2.** Start the dev server — **Copy** and run in your terminal (one command per line):
 
-```bash
-cd "{{CHILD_FOLDER}}" && npm run dev
+```powershell
+cd "{{CHILD_FOLDER}}"
+npm run dev
 ```
+
+*Works in **PowerShell** (including Windows PowerShell 5). Do not use `&&` on Windows — it errors in the default shell.*
 
 **3.** Open the preview:
 
