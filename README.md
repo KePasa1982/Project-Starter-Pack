@@ -33,11 +33,15 @@ The user has a spark: what to try, build, or explore. **They do not create proje
 ## Steps 1–3 — Mechanical (agent)
 
 1. **Open this repo** (`Project-Starter-Pack` — wherever you cloned it, e.g. `…/Project-Starter-Pack`) and read **[AGENTS.md](AGENTS.md)**.
-2. **Bootstrap** from this directory:
+2. **Ask project kind** (unless the user already chose): **BROWSER** (preview in browser — default) or **DESKTOP** (native app with Tauri 2).
+3. **Bootstrap** from this directory:
 
    ```bash
-   # Linux / macOS
-   python3 scripts/bootstrap_new_project.py --title "Your Project Title"
+   # Linux / macOS — browser (default)
+   python3 scripts/bootstrap_new_project.py --title "Your Project Title" --kind browser
+
+   # Desktop native app (Tauri 2)
+   python3 scripts/bootstrap_new_project.py --title "Your Project Title" --kind desktop
    ```
 
    On **Windows**, use `python` instead of `python3` (Python 3.10+ on PATH). See **[docs/PLATFORMS.md](docs/PLATFORMS.md)**.
@@ -70,10 +74,20 @@ So every fresh agent gets the same instruction without the user repeating the pa
 
 ---
 
-## What gets created (default template `web-vite-ts`)
+## What gets created
+
+### Browser (`--kind browser` · template `web-vite-ts`) — default
 
 - **Naming** — display title **`PSP …`**; folder + npm name **`psp-…`** as a sibling of `Project-Starter-Pack` (default parent = directory that contains this repo).
 - **Vite + TypeScript** — `npm run dev` / `npm run build`. Each child gets a **unique dev port** (`5200–6099`) at bootstrap so multiple PSP projects can run in Cursor without fighting over `5173`.
+
+### Desktop (`--kind desktop` · template `tauri-vite-ts`)
+
+- **Tauri 2 + Vite + TypeScript** — `npm run tauri:dev` (native window) / `npm run tauri:build` (installer). Bootstrap verifies **`npm run build`** (frontend); Rust required for native dev/build ([rustup.rs](https://rustup.rs)).
+- Same **naming**, **port**, **Git**, and **idea layer** as browser projects.
+
+### Both kinds
+
 - **CI** — workflow in the template (install + build) for hosts that run it.
 - **Idea layer** — root **`DESIGN.md`**, **`ideas/INBOX.md`**; **`docs/`** for longer notes (includes **`INDUSTRY_STANDARD_VERSIONING.md`** and **`GITHUB_SETUP_WALKTHROUGH.md`** after bootstrap).
 - **`.cursor/rules`** in the child — **`user-project-standard`**, **`github-setup-offer`** (YES/NO GitHub prompt), **`github-push-offer`** (optional commit/push reminder after meaningful work when `origin` exists), plus **`karpathy-guidelines`** ([andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills), MIT); delete rules you do not want.

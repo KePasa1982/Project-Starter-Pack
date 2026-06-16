@@ -184,9 +184,78 @@ Success: remote shows new commit. If push fails, → Troubleshooting.
 
 Send this **after** GitHub setup completes (**YES** path) **or** the user declines (**NO**). This is the **only** place to mention local dev in the bootstrap flow.
 
-Use the **Beat B** user template in **[HANDOFF_MESSAGES.md](HANDOFF_MESSAGES.md)** — fill placeholders; paste the correct **GitHub status** line (connected vs skipped). Keep tables, dividers, and **copy-friendly** code blocks (folder path; `cd` + `npm run dev` as **separate lines** in a `powershell` block — never `&&` for Windows users).
+Use the **Beat B** user template in **[HANDOFF_MESSAGES.md](HANDOFF_MESSAGES.md)** — fill placeholders; paste the correct **GitHub status** line (connected vs skipped). Use **Beat B — browser** or **Beat B — desktop** based on bootstrap `kind`. Keep tables, dividers, icons, and **copy-friendly** code blocks (one command per line — never `&&` on Windows).
 
 Do **not** repeat bootstrap author / amend instructions unless they ask.
+
+---
+
+## User-facing phase messages (GitHub YES path)
+
+Send **one phase card at a time**. Keep the visual style (icons, tables, short lines). Wait for confirmation before the next phase.
+
+### Phase 0 — Machine check
+
+```markdown
+## 🔍 GitHub · Phase 0 of 4 — Machine check
+
+|  | Check | Status |
+|--|-------|--------|
+| 🛠️ | Git installed | _(fill after user runs `git --version`)_ |
+| 👤 | Git identity | _(fill from `git config --global user.name`)_ |
+| 🔗 | Remote already set? | _(fill from `git remote -v`)_ |
+
+Paste your terminal output if anything looks off — we’ll fix it before GitHub.
+```
+
+### Phase 2 — Create repository
+
+```markdown
+## ☁️ GitHub · Phase 2 of 4 — Create repository
+
+| # | Action |
+|---|--------|
+| 1️⃣ | Open [github.com/new](https://github.com/new) |
+| 2️⃣ | Name: `psp-your-project` *(match your folder)* |
+| 3️⃣ | **Do not** add README, `.gitignore`, or license |
+| 4️⃣ | Copy the **HTTPS** URL |
+
+**Paste the URL here when ready** — we’ll link your local project next.
+```
+
+### Phase 3 — Link and push
+
+```markdown
+## 🔗 GitHub · Phase 3 of 4 — Link & push
+
+Run these in your terminal *(one command per line)*:
+
+```powershell
+cd "<CHILD_PROJECT_FOLDER>"
+git remote add origin https://github.com/<USERNAME>/<REPO>.git
+git push -u origin <BRANCH>
+```
+
+Enter your GitHub username and **personal access token** in the terminal when prompted — not in this chat.
+```
+
+### Phase 4 — Verify push loop
+
+```markdown
+## ✅ GitHub · Phase 4 of 4 — Verify sync
+
+Optional quick test — run *(one command per line)*:
+
+```powershell
+cd "<CHILD_PROJECT_FOLDER>"
+npm run build
+git add -A
+git commit -m "Test: verify GitHub push from local dev"
+git push
+```
+
+*Use `npm.cmd` instead of `npm` on Windows PowerShell if needed.*
+```
 
 **After GitHub works:** ongoing work uses **`.cursor/rules/github-push-offer.mdc`** — agents offer *commit and push* / *commit only* / *skip* after meaningful tasks; they do not push without consent.
 

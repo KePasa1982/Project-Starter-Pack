@@ -1,0 +1,25 @@
+---
+description: Prevent accidental bulk or cross-project deletion — hard safety policy
+alwaysApply: true
+---
+
+# Deletion safety (mandatory)
+
+Protect all projects. Never interpret cleanup language as permission to wipe folders.
+
+## Never do
+
+- Delete directories, project roots, or sibling folders
+- Run bulk delete: `rm -rf`, `Remove-Item -Recurse`, `del /s`, `rmdir /s`, `shutil.rmtree` on project paths
+- Honor vague prompts like "delete everything", "clean up", or "remove all except X" without a path list
+- Delete files outside the current project's scope when the workspace is a parent folder
+
+## Allowed only with explicit approval
+
+- Delete a **single file** when the user names the **exact path** in that message
+- Delete **2+ files or any folder**: STOP, list every exact path, wait for explicit "yes, delete these"
+
+## Workspace scope
+
+- If the workspace is a parent folder (e.g. `PROJECTS V2`), treat **every sibling project as out of scope** unless the user names it
+- Prefer listing candidates over deleting; never delete on the same turn as discovery

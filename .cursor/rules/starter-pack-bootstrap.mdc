@@ -11,7 +11,7 @@ alwaysApply: true
 
 - Read [README.md](README.md) first, then [AGENTS.md](AGENTS.md) and [WORKFLOW.md](WORKFLOW.md).
 - **Do not** improvise folder layout for new apps; only use [template/](template/) and [scripts/bootstrap_new_project.py](scripts/bootstrap_new_project.py).
-- When the **user** asks for a **new** project, run bootstrap, then continue in the **new sibling folder** (name starts with **`psp-`**) beside the starter pack’s parent, not here.
+- When the **user** asks for a **new** project, ask **BROWSER** or **DESKTOP** (unless they already chose), run bootstrap with `--kind`, then continue in the **new sibling folder** (name starts with **`psp-`**) beside the starter pack’s parent, not here.
 - **Beat A / Beat B:** use the premium user templates in [docs/HANDOFF_MESSAGES.md](docs/HANDOFF_MESSAGES.md) (tables, copy-friendly code blocks, GitHub **YES** / **NO** in Beat A only). **Beat B** after GitHub or NO — [docs/GITHUB_SETUP_WALKTHROUGH.md](docs/GITHUB_SETUP_WALKTHROUGH.md) Phase 5. Keep this factory repo free of any one user’s paths, usernames, or tokens.
 
 **If the workspace is a child project** created from this pack:

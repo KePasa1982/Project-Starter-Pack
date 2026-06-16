@@ -22,6 +22,6 @@ Use the **Beat A** user template in **[`docs/HANDOFF_MESSAGES.md`](docs/HANDOFF_
 
 ## Beat B — after GitHub finishes or NO
 
-Use the **Beat B** user template in **[`docs/HANDOFF_MESSAGES.md`](docs/HANDOFF_MESSAGES.md)**. Fill placeholders; paste the correct **GitHub status** line (connected vs skipped). Use **Beat B — browser** or **Beat B — desktop** based on bootstrap `kind`.
+Use the **Beat B — desktop** user template in **[`docs/HANDOFF_MESSAGES.md`](docs/HANDOFF_MESSAGES.md)**. Fill placeholders; paste the correct **GitHub status** line (connected vs skipped).
 
 Then invite what to build. Ongoing push reminders: [`github-push-offer.mdc`](github-push-offer.mdc).

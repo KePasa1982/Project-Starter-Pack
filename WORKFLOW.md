@@ -7,10 +7,11 @@ Ultra-short decision tree for the **user** and agents.
 The user has a **new** inspiration and wants a **new** project folder.
 
 1. They use the trigger (see [README.md](README.md)): *start a new project … use the **Project Starter Pack***.
-2. Agent opens **`Project-Starter-Pack`**, reads **README.md** first, runs [scripts/bootstrap_new_project.py](scripts/bootstrap_new_project.py) (new folder name is always **`psp-…`** beside the starter pack’s parent unless `--dest` says otherwise; in-app title is **`PSP …`**).
-3. Agent continues in the **new sibling folder** (not inside the starter pack).
-4. Agent sends **Beat A** from **`docs/HANDOFF_MESSAGES.md`** (premium layout + GitHub **YES** / **NO** only — no dev-server checklist yet). If **YES**, follow **`docs/GITHUB_SETUP_WALKTHROUGH.md`** in the child. **Beat B** from the same handoff doc after GitHub or **NO**.
-5. After GitHub finishes or user says **NO**: GitHub result (if any), local **`npm run dev`** reminder, then invite them to describe what to build (walkthrough **Phase 5**).
+2. Agent asks **BROWSER** or **DESKTOP** (one word) unless the user already chose.
+3. Agent opens **`Project-Starter-Pack`**, reads **README.md** first, runs [scripts/bootstrap_new_project.py](scripts/bootstrap_new_project.py) with `--kind browser` or `--kind desktop` (new folder name is always **`psp-…`** beside the starter pack’s parent unless `--dest` says otherwise; in-app title is **`PSP …`**).
+4. Agent continues in the **new sibling folder** (not inside the starter pack).
+5. Agent sends **Beat A** from **`docs/HANDOFF_MESSAGES.md`** (premium layout + GitHub **YES** / **NO** only — no dev-server checklist yet). If **YES**, follow **`docs/GITHUB_SETUP_WALKTHROUGH.md`** in the child. **Beat B** from the same handoff doc after GitHub or **NO** (browser or desktop block).
+6. After GitHub finishes or user says **NO**: GitHub result (if any), local dev reminder, then invite them to describe what to build (walkthrough **Phase 5**).
 
 **Optional remote:** **`docs/INDUSTRY_STANDARD_VERSIONING.md`** in the child for reference.
 

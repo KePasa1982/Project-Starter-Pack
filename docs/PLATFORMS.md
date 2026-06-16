@@ -76,6 +76,15 @@ git push
 
 Agents and handoff templates in this pack follow this rule — see **[HANDOFF_MESSAGES.md](HANDOFF_MESSAGES.md)** and **[GITHUB_SETUP_WALKTHROUGH.md](GITHUB_SETUP_WALKTHROUGH.md)**.
 
+### Desktop native apps (`--kind desktop`)
+
+| Tool | Purpose |
+|------|---------|
+| **Rust** ([rustup.rs](https://rustup.rs)) | Required for `npm run tauri:dev` and `npm run tauri:build` |
+| **Microsoft C++ Build Tools** (Windows) | Required by Tauri on Windows — installer prompts when missing |
+
+Bootstrap only runs **`npm run build`** (frontend). First **`tauri:dev`** compiles Rust and may take several minutes.
+
 ## Child projects (after bootstrap)
 
 Each new **`psp-…`** app is a normal **Vite + TypeScript** web project: `npm run dev`, `npm run build`, optional GitHub CI from the template. No extra platform-specific pack changes are required for end users beyond installing the tools above.

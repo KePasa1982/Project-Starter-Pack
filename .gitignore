@@ -10,3 +10,4 @@ __pycache__/
 template/**/node_modules/
 template/**/dist/
 template/**/dist-ssr/
+template/**/src-tauri/target/

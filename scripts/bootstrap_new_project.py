@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create a new sibling project from template/web-vite-ts. The user does not run this by hand — agents do."""
+"""Create a new sibling project from a PSP template. The user does not run this by hand — agents do."""
 
 from __future__ import annotations
 
@@ -13,7 +13,19 @@ import zlib
 from pathlib import Path
 
 STARTER_ROOT = Path(__file__).resolve().parent.parent
-TEMPLATE = STARTER_ROOT / "template" / "web-vite-ts"
+
+# browser = Vite in the browser (default). desktop = Tauri 2 native app.
+TEMPLATE_DIRS: dict[str, str] = {
+    "browser": "web-vite-ts",
+    "web": "web-vite-ts",
+    "desktop": "tauri-vite-ts",
+    "tauri": "tauri-vite-ts",
+}
+
+KIND_LABELS: dict[str, str] = {
+    "browser": "Browser app (local dev server)",
+    "desktop": "Desktop app (Tauri 2 native)",
+}
 
 
 def _tool_exe(name: str) -> str:
@@ -38,10 +50,25 @@ _SLUG_FULLMATCH = re.compile(r"[a-z0-9][a-z0-9-]{0,62}[a-z0-9]|[a-z0-9]")
 _VITE_PORT_RE = re.compile(r"port:\s*(\d+)", re.MULTILINE)
 _VITE_PORT_ASSIGN_RE = re.compile(r"(port:\s*)(\d+)(\s*,)")
 _VITE_OPEN_ASSIGN_RE = re.compile(r'open:\s*"http://127\.0\.0\.1:\d+/"')
+_TAURI_DEVURL_RE = re.compile(r'("devUrl":\s*")http://localhost:\d+(")')
 
 # Dev ports for PSP children (avoid Vite default 5173 so multiple projects do not collide in Cursor).
 DEV_PORT_MIN = 5200
 DEV_PORT_MAX = 6099
+
+
+def normalize_kind(raw: str) -> str:
+    key = raw.strip().lower()
+    if key not in TEMPLATE_DIRS:
+        choices = ", ".join(sorted({"browser", "desktop"}))
+        sys.exit(f"Unknown --kind {raw!r}. Use one of: {choices}")
+    if key in ("web", "tauri"):
+        return "browser" if key == "web" else "desktop"
+    return key
+
+
+def template_path(kind: str) -> Path:
+    return STARTER_ROOT / "template" / TEMPLATE_DIRS[kind]
 
 
 def slug_is_valid(slug: str) -> bool:
@@ -97,6 +124,23 @@ def slugify(title: str) -> str:
     return s or "untitled-project"
 
 
+def rust_crate_name(slug: str) -> str:
+    name = slug.replace("-", "_")
+    if not name or not name[0].isalpha():
+        name = f"app_{name}" if name else "app"
+    return name
+
+
+def rust_lib_name(slug: str) -> str:
+    return f"{rust_crate_name(slug)}_lib"
+
+
+def project_identifier(slug: str) -> str:
+    base = slug.removeprefix(PSP_SLUG_PREFIX) or "project"
+    base = re.sub(r"[^a-z0-9.-]", "", base.lower()) or "project"
+    return f"com.psp.{base}"
+
+
 def non_ascii_slug_help_suffix(slug: str, raw_title: str) -> str:
     """Extra help when slug/title contains non-ASCII (slugify can keep Unicode letters)."""
     if any(ord(c) > 127 for c in slug) or any(ord(c) > 127 for c in raw_title):
@@ -116,7 +160,14 @@ def exit_if_slug_invalid(slug: str, raw_title: str) -> None:
     )
 
 
-def replace_placeholders(text: str, title: str, slug: str, dev_port: int) -> str:
+def replace_placeholders(
+    text: str,
+    title: str,
+    slug: str,
+    dev_port: int,
+    *,
+    kind: str,
+) -> str:
     name = title
     port_s = str(dev_port)
     return (
@@ -124,6 +175,11 @@ def replace_placeholders(text: str, title: str, slug: str, dev_port: int) -> str
         .replace("{{PROJECT_SLUG}}", slug)
         .replace("{{PROJECT_NAME}}", name)
         .replace("{{DEV_PORT}}", port_s)
+        .replace("{{PROJECT_KIND}}", kind)
+        .replace("{{PROJECT_KIND_LABEL}}", KIND_LABELS[kind])
+        .replace("{{PROJECT_IDENTIFIER}}", project_identifier(slug))
+        .replace("{{RUST_CRATE_NAME}}", rust_crate_name(slug))
+        .replace("{{RUST_LIB_NAME}}", rust_lib_name(slug))
     )
 
 
@@ -188,12 +244,12 @@ def allocate_dev_port(slug: str, parent: Path, *, exclude: Path | None = None) -
 
 def _ignore_copytree_artifacts(_src: str, names: list[str]) -> list[str]:
     """Do not copy install/build outputs — a copied ``node_modules`` breaks ``npm install`` in the child."""
-    skip = {"node_modules", "dist", "dist-ssr", ".git"}
+    skip = {"node_modules", "dist", "dist-ssr", ".git", "target"}
     return [n for n in names if n in skip]
 
 
 def under_skipped_dir(p: Path, target: Path) -> bool:
-    skip_dirs = {"node_modules", "dist", "dist-ssr", ".git"}
+    skip_dirs = {"node_modules", "dist", "dist-ssr", ".git", "target", "__pycache__"}
     try:
         rel = p.relative_to(target)
     except ValueError:
@@ -218,14 +274,24 @@ def _cleanup_failed_bootstrap(target: Path) -> None:
         )
 
 
-def _materialize_project_tree(target: Path, title: str, slug: str, dev_port: int) -> None:
+def _materialize_project_tree(
+    target: Path,
+    title: str,
+    slug: str,
+    dev_port: int,
+    *,
+    kind: str,
+    template: Path,
+) -> None:
     """Copy template, rename AGENTS, replace placeholders, add industry guide. No git yet."""
-    shutil.copytree(TEMPLATE, target, ignore=_ignore_copytree_artifacts)
+    shutil.copytree(template, target, ignore=_ignore_copytree_artifacts)
     agents_tpl = target / "AGENTS.md.template"
     if agents_tpl.is_file():
         agents_tpl.rename(target / "AGENTS.md")
-    apply_placeholders(target, title, slug, dev_port)
-    patch_vite_dev_server(target, dev_port)
+    apply_placeholders(target, title, slug, dev_port, kind=kind)
+    patch_vite_dev_port(target, dev_port, kind=kind)
+    if kind == "desktop":
+        patch_tauri_dev_url(target, dev_port)
     dest_docs = target / "docs"
     dest_docs.mkdir(parents=True, exist_ok=True)
     for name in (
@@ -239,10 +305,18 @@ def _materialize_project_tree(target: Path, title: str, slug: str, dev_port: int
             shutil.copy2(src, dest_docs / name)
 
 
-def _materialize_with_cleanup(target: Path, title: str, slug: str, dev_port: int) -> bool:
+def _materialize_with_cleanup(
+    target: Path,
+    title: str,
+    slug: str,
+    dev_port: int,
+    *,
+    kind: str,
+    template: Path,
+) -> bool:
     """Create tree under ``target``; on failure remove ``target`` if it exists. Returns True on success."""
     try:
-        _materialize_project_tree(target, title, slug, dev_port)
+        _materialize_project_tree(target, title, slug, dev_port, kind=kind, template=template)
     except Exception as e:
         print(
             f"[bootstrap] error: failed while preparing project folder ({e}).",
@@ -262,8 +336,8 @@ def vite_dev_open_url(dev_port: int) -> str:
     return f"http://127.0.0.1:{dev_port}/"
 
 
-def patch_vite_dev_server(target: Path, dev_port: int) -> None:
-    """Set Vite dev port and browser-open URL in the child ``vite.config.ts``."""
+def patch_vite_dev_port(target: Path, dev_port: int, *, kind: str) -> None:
+    """Set Vite dev port in the child ``vite.config.ts`` (browser: also patch open URL)."""
     vite = target / "vite.config.ts"
     if not vite.is_file():
         return
@@ -271,31 +345,57 @@ def patch_vite_dev_server(target: Path, dev_port: int) -> None:
     new, port_count = _VITE_PORT_ASSIGN_RE.subn(rf"\g<1>{dev_port}\g<3>", raw, count=1)
     if port_count != 1:
         sys.exit(f"Could not patch dev port in {vite}")
-    open_url = vite_dev_open_url(dev_port)
-    new, open_count = _VITE_OPEN_ASSIGN_RE.subn(f'open: "{open_url}"', new, count=1)
-    if open_count != 1:
-        sys.exit(f"Could not patch dev open URL in {vite}")
+    if kind == "browser":
+        open_url = vite_dev_open_url(dev_port)
+        new, open_count = _VITE_OPEN_ASSIGN_RE.subn(f'open: "{open_url}"', new, count=1)
+        if open_count != 1:
+            sys.exit(f"Could not patch dev open URL in {vite}")
     vite.write_text(new, encoding="utf-8")
 
 
-def apply_placeholders(target: Path, title: str, slug: str, dev_port: int) -> None:
+def patch_tauri_dev_url(target: Path, dev_port: int) -> None:
+    """Set Tauri ``devUrl`` to match the Vite port."""
+    conf = target / "src-tauri" / "tauri.conf.json"
+    if not conf.is_file():
+        return
+    raw = conf.read_text(encoding="utf-8")
+    new, count = _TAURI_DEVURL_RE.subn(rf"\g<1>http://localhost:{dev_port}\g<2>", raw, count=1)
+    if count != 1:
+        sys.exit(f"Could not patch devUrl in {conf}")
+    conf.write_text(new, encoding="utf-8")
+
+
+def apply_placeholders(
+    target: Path,
+    title: str,
+    slug: str,
+    dev_port: int,
+    *,
+    kind: str,
+) -> None:
     for path in target.rglob("*"):
         if not path.is_file() or under_skipped_dir(path, target):
             continue
-        if path.suffix.lower() in {".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".woff2"}:
+        if path.suffix.lower() in {".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".woff2", ".icns"}:
             continue
         try:
             raw = path.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
             continue
-        if "{{PROJECT_" not in raw and "{{DEV_PORT}}" not in raw:
+        if "{{PROJECT_" not in raw and "{{DEV_PORT}}" not in raw and "{{RUST_" not in raw:
             continue
-        path.write_text(replace_placeholders(raw, title, slug, dev_port), encoding="utf-8")
+        path.write_text(replace_placeholders(raw, title, slug, dev_port, kind=kind), encoding="utf-8")
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Bootstrap a new PSP project from web-vite-ts template.")
+    parser = argparse.ArgumentParser(description="Bootstrap a new PSP project from a template.")
     parser.add_argument("--title", required=True, help='Idea name (e.g. "Neon Maze"). "PSP " is added automatically to the display title.')
+    parser.add_argument(
+        "--kind",
+        default="browser",
+        help="Project type: browser (Vite in browser, default) or desktop (Tauri 2 native app). "
+        "Aliases: web, tauri.",
+    )
     parser.add_argument(
         "--slug",
         help="Folder + npm name (letters, digits, hyphens). Default: psp- + slug from title. "
@@ -307,6 +407,9 @@ def main() -> int:
         help="Parent directory for the new folder (default: parent directory of Project-Starter-Pack)",
     )
     args = parser.parse_args()
+
+    kind = normalize_kind(args.kind)
+    template = template_path(kind)
 
     raw_title = args.title.strip()
     if not raw_title:
@@ -328,21 +431,34 @@ def main() -> int:
     if target.exists():
         sys.exit(f"Refusing to overwrite existing path: {target}")
 
-    if not TEMPLATE.is_dir():
-        sys.exit(f"Missing template directory: {TEMPLATE}")
+    if not template.is_dir():
+        sys.exit(f"Missing template directory: {template}")
 
     dev_port = allocate_dev_port(slug, parent, exclude=target)
 
-    if not _materialize_with_cleanup(target, title, slug, dev_port):
+    if not _materialize_with_cleanup(target, title, slug, dev_port, kind=kind, template=template):
         return 1
 
     print(f"[bootstrap] created: {target}", flush=True)
+    print(f"[bootstrap] kind: {kind!r} ({KIND_LABELS[kind]})", flush=True)
+    print(f"[bootstrap] template: {template.name}", flush=True)
     print(f"[bootstrap] title: {title!r} slug: {slug!r}", flush=True)
-    print(
-        f"[bootstrap] dev server: http://localhost:{dev_port} "
-        f"(also http://127.0.0.1:{dev_port}; unique port for this project)",
-        flush=True,
-    )
+    print(f"[bootstrap] dev port: {dev_port}", flush=True)
+    if kind == "browser":
+        print(
+            f"[bootstrap] dev server: http://localhost:{dev_port} "
+            f"(also http://127.0.0.1:{dev_port}; unique port for this project)",
+            flush=True,
+        )
+    else:
+        print(
+            f"[bootstrap] desktop dev: npm run tauri:dev (Vite on port {dev_port} behind Tauri)",
+            flush=True,
+        )
+        print(
+            "[bootstrap] note: native .exe build needs Rust (rustup.rs); bootstrap only verifies frontend build.",
+            flush=True,
+        )
 
     try:
         subprocess.run(_argv("git", "init"), cwd=target, check=True, capture_output=True, text=True)
@@ -373,7 +489,6 @@ def main() -> int:
 
     try:
         subprocess.run(_argv("git", "add", "-A"), cwd=target, check=True, capture_output=True, text=True)
-        # One-shot author so the first commit succeeds even when global git user.name/email is unset.
         commit = subprocess.run(
             _argv(
                 "git",
@@ -411,10 +526,14 @@ def main() -> int:
     print("[bootstrap] agent handoff (do not dump the old multi-step checklist on the user)")
     print(f"  Child folder: {target}")
     print(f"  Display title: {title}")
-    print(
-        f"  Dev URL (after Beat B): http://localhost:{dev_port} "
-        f"(http://127.0.0.1:{dev_port} works too) — npm run dev opens {vite_dev_open_url(dev_port)} when server.open is set"
-    )
+    print(f"  Project kind: {kind} — {KIND_LABELS[kind]}")
+    if kind == "browser":
+        print(
+            f"  Dev URL (after Beat B): http://localhost:{dev_port} "
+            f"(http://127.0.0.1:{dev_port} works too) — npm run dev opens {vite_dev_open_url(dev_port)} when server.open is set"
+        )
+    else:
+        print(f"  Dev command (after Beat B): npm run tauri:dev (port {dev_port})")
     print("  First reply (Beat A): docs/HANDOFF_MESSAGES.md — premium template + GitHub YES/NO only.")
     print("  After GitHub YES or NO (Beat B): docs/HANDOFF_MESSAGES.md — then invite to build.")
     print(f"  Walkthrough: {target / 'docs' / 'GITHUB_SETUP_WALKTHROUGH.md'}")

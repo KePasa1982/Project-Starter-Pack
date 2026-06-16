@@ -46,6 +46,12 @@ jobs:
           npm ci
           npm run build
 
+      - name: Desktop template — install and build (frontend only)
+        working-directory: template/tauri-vite-ts
+        run: |
+          npm ci
+          npm run build
+
       - name: Bootstrap smoke (create project + build)
         run: |
           set -euo pipefail

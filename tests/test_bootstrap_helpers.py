@@ -60,11 +60,22 @@ class TestSlugAndTitle(unittest.TestCase):
         self.assertEqual(b.with_display_title("(PSP) Neon"), "PSP Neon")
 
     def test_replace_placeholders(self) -> None:
-        raw = "name={{PROJECT_SLUG}} title={{PROJECT_TITLE}} port={{DEV_PORT}}"
+        raw = "name={{PROJECT_SLUG}} title={{PROJECT_TITLE}} port={{DEV_PORT}} kind={{PROJECT_KIND}}"
         self.assertEqual(
-            b.replace_placeholders(raw, "PSP T", "psp-t", 5432),
-            "name=psp-t title=PSP T port=5432",
+            b.replace_placeholders(raw, "PSP T", "psp-t", 5432, kind="browser"),
+            "name=psp-t title=PSP T port=5432 kind=browser",
         )
+
+    def test_rust_names_from_slug(self) -> None:
+        self.assertEqual(b.rust_crate_name("psp-magic-factory"), "psp_magic_factory")
+        self.assertEqual(b.rust_lib_name("psp-magic-factory"), "psp_magic_factory_lib")
+        self.assertEqual(b.project_identifier("psp-magic-factory"), "com.psp.magic-factory")
+
+    def test_normalize_kind(self) -> None:
+        self.assertEqual(b.normalize_kind("browser"), "browser")
+        self.assertEqual(b.normalize_kind("desktop"), "desktop")
+        self.assertEqual(b.normalize_kind("web"), "browser")
+        self.assertEqual(b.normalize_kind("tauri"), "desktop")
 
 
 class TestDevPortAllocation(unittest.TestCase):
@@ -103,12 +114,19 @@ class TestDevPortAllocation(unittest.TestCase):
 
 
 class TestMaterializeCleanup(unittest.TestCase):
+    def _browser_template(self) -> Path:
+        return b.template_path("browser")
+
     def test_cleanup_when_copytree_blocked_by_existing_target(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             target = Path(td) / "psp-clash"
             target.mkdir()
             (target / "marker").write_text("x", encoding="utf-8")
-            self.assertFalse(b._materialize_with_cleanup(target, "PSP X", "psp-clash", 5200))
+            self.assertFalse(
+                b._materialize_with_cleanup(
+                    target, "PSP X", "psp-clash", 5200, kind="browser", template=self._browser_template()
+                )
+            )
             self.assertFalse(target.exists())
 
     def test_cleanup_when_materialize_raises(self) -> None:
@@ -116,7 +134,11 @@ class TestMaterializeCleanup(unittest.TestCase):
             target = Path(td) / "psp-fail"
             target.mkdir()
             with patch.object(b, "_materialize_project_tree", side_effect=RuntimeError("fail")):
-                self.assertFalse(b._materialize_with_cleanup(target, "PSP X", "psp-fail", 5200))
+                self.assertFalse(
+                    b._materialize_with_cleanup(
+                        target, "PSP X", "psp-fail", 5200, kind="browser", template=self._browser_template()
+                    )
+                )
             self.assertFalse(target.exists())
 
 
@@ -153,7 +175,7 @@ class TestViteDevServerHost(unittest.TestCase):
                 (_ROOT / "template" / "web-vite-ts" / "vite.config.ts").read_text(encoding="utf-8"),
                 encoding="utf-8",
             )
-            b.patch_vite_dev_server(target, 5432)
+            b.patch_vite_dev_port(target, 5432, kind="browser")
             text = vite.read_text(encoding="utf-8")
             self.assertRegex(text, r"port:\s*5432")
             self.assertRegex(text, r'open:\s*"http://127\.0\.0\.1:5432/"')
@@ -225,6 +247,8 @@ class TestHandoffMessages(unittest.TestCase):
         self.assertIn("{{CHILD_FOLDER}}", text)
         self.assertIn("Copy", text)
         self.assertIn("one command per line", text.lower())
+        self.assertIn("Beat B — desktop", text)
+        self.assertIn("{{PROJECT_KIND_LABEL}}", text)
         self.assertNotIn('cd "{{CHILD_FOLDER}}" && npm run dev', text)
 
     def test_walkthrough_avoids_windows_and_chain_in_phase4(self) -> None:
@@ -246,11 +270,32 @@ class TestHandoffMessages(unittest.TestCase):
         self.assertIn("THIRD_PARTY_NOTICES.md", src)
 
 
+class TestTemplateKinds(unittest.TestCase):
+    def test_both_templates_exist(self) -> None:
+        for kind in ("browser", "desktop"):
+            path = b.template_path(kind)
+            self.assertTrue(path.is_dir(), path)
+            self.assertTrue((path / "package.json").is_file())
+
+    def test_patch_tauri_dev_url(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            conf = root / "src-tauri" / "tauri.conf.json"
+            conf.parent.mkdir(parents=True)
+            conf.write_text(
+                '{"build":{"devUrl":"http://localhost:5200"}}',
+                encoding="utf-8",
+            )
+            b.patch_tauri_dev_url(root, 5999)
+            text = conf.read_text(encoding="utf-8")
+            self.assertIn("http://localhost:5999", text)
+
+
 class TestCopytreeIgnore(unittest.TestCase):
     def test_ignore_drops_artifacts(self) -> None:
-        names = ["src", "node_modules", "package.json", "dist", ".git", "README.md"]
+        names = ["src", "node_modules", "package.json", "dist", ".git", "target", "README.md"]
         ignored = set(b._ignore_copytree_artifacts("/fake", names))
-        self.assertEqual(ignored, {"node_modules", "dist", ".git"})
+        self.assertEqual(ignored, {"node_modules", "dist", ".git", "target"})
         # dist-ssr is skipped when present
         names2 = ["a", "dist-ssr"]
         self.assertEqual(set(b._ignore_copytree_artifacts("/fake", names2)), {"dist-ssr"})

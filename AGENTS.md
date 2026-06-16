@@ -10,19 +10,21 @@ When the **user** wants a **new** project using **this starter pack**, this fold
 
 0. **User** — has an idea / inspiration (no folders required from them).
 1. **Trigger** — they ask to start a new project using the **Project Starter Pack** (wording may vary).
-2. **You** — open this repo, read **[README.md](README.md)** first, then this file.
-3. **Bootstrap** — from repo root:
+2. **Project kind** — ask **one word** unless they already said: **BROWSER** (default) or **DESKTOP** (Tauri 2 native app).
+3. **You** — open this repo, read **[README.md](README.md)** first, then this file.
+4. **Bootstrap** — from repo root:
 
    ```bash
    # Linux / macOS: python3 …   |   Windows: python …  (Python 3.10+)
-   python3 scripts/bootstrap_new_project.py --title "<from the user>"
+   python3 scripts/bootstrap_new_project.py --title "<from the user>" --kind browser
+   # or: --kind desktop
    ```
 
    See **[docs/PLATFORMS.md](docs/PLATFORMS.md)** if the command is not found.
 
    The script always prefixes the **display title** with **`PSP `** and the **folder / npm slug** with **`psp-`** (unless `--slug` already starts with `psp-`) so PSP-born projects are easy to spot next to whatever else lives beside the starter pack. Add `--slug …` only if the auto slug from the title is wrong.
 
-4. **Baseline bar** — you must verify (bootstrap does most of this):
+5. **Baseline bar** — you must verify (bootstrap does most of this):
 
    - **`.gitignore`** present (template).
    - **`package-lock.json`** present and **committed** in the initial commit (bootstrap uses a one-shot git author for that commit so it succeeds without global `user.name`; the user may **`git commit --amend --reset-author`** later if they care about author metadata).
@@ -30,13 +32,13 @@ When the **user** wants a **new** project using **this starter pack**, this fold
    - **`npm run build`** passes after bootstrap.
    - **No** custom code-history / per-save snapshot hooks in this pack — industry standard is **Git + remote + lockfile + CI** only (see [INDUSTRY_STANDARD_VERSIONING.md](INDUSTRY_STANDARD_VERSIONING.md)).
 
-5. **Handoff (two beats — do not merge)** — bootstrap prints paths for **you** only. User-facing copy lives in **[docs/HANDOFF_MESSAGES.md](docs/HANDOFF_MESSAGES.md)** (also copied into each child’s `docs/`). Use those templates **verbatim in structure** — premium Markdown (tables, dividers, icons, copy-friendly code blocks). Cursor has **Copy** on fenced blocks; there are no custom HTML buttons.
+6. **Handoff (two beats — do not merge)** — bootstrap prints paths for **you** only. User-facing copy lives in **[docs/HANDOFF_MESSAGES.md](docs/HANDOFF_MESSAGES.md)** (also copied into each child’s `docs/`). Use those templates **verbatim in structure** — premium Markdown (tables, dividers, icons, copy-friendly code blocks). Cursor has **Copy** on fenced blocks; there are no custom HTML buttons.
 
-   **Beat A — first reply (right after bootstrap):** send the **Beat A** template from **HANDOFF_MESSAGES.md** (fill `{{DISPLAY_TITLE}}`, `{{CHILD_FOLDER}}`). GitHub **YES** / **NO** only — no dev server or idea-file dump.
+   **Beat A — first reply (right after bootstrap):** send the **Beat A** template from **HANDOFF_MESSAGES.md** (fill `{{DISPLAY_TITLE}}`, `{{CHILD_FOLDER}}`, `{{PROJECT_KIND_LABEL}}`). GitHub **YES** / **NO** only — no dev server or idea-file dump.
 
-   **Beat B — after GitHub is finished or declined:** send the **Beat B** template from **HANDOFF_MESSAGES.md** (fill placeholders + correct GitHub status line). See step 6 and **[docs/GITHUB_SETUP_WALKTHROUGH.md](docs/GITHUB_SETUP_WALKTHROUGH.md)** Phase 5. Bootstrap does not create a remote or push.
+   **Beat B — after GitHub is finished or declined:** send the **Beat B** template from **HANDOFF_MESSAGES.md** — **browser** or **desktop** block based on `--kind`. See step 7 and **[docs/GITHUB_SETUP_WALKTHROUGH.md](docs/GITHUB_SETUP_WALKTHROUGH.md)** Phase 5. Bootstrap does not create a remote or push.
 
-6. **GitHub setup (mandatory in Beat A)** — if **YES**, open the child’s **`docs/GITHUB_SETUP_WALKTHROUGH.md`** and walk **phase by phase**. Use **their** path and GitHub username only in chat / local git — **never** commit personal data into **Project-Starter-Pack**. Never ask for tokens or passwords in chat.
+7. **GitHub setup (mandatory in Beat A)** — if **YES**, open the child’s **`docs/GITHUB_SETUP_WALKTHROUGH.md`** and walk **phase by phase**. Use **their** path and GitHub username only in chat / local git — **never** commit personal data into **Project-Starter-Pack**. Never ask for tokens or passwords in chat.
 
    - **NO** — note they can connect later; go straight to **Beat B** (local dev + build invite). Do not nag.
 

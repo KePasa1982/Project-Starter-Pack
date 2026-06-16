@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "matcher": "Delete",
+        "type": "prompt",
+        "prompt": "The agent is attempting to DELETE a file or folder. DENY unless the user's latest message explicitly names this exact path and asks to delete it. Never allow bulk deletion, directory deletion, or deleting sibling projects. When in doubt, DENY. Hook input: $ARGUMENTS",
+        "timeout": 15,
+        "failClosed": true
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "matcher": "Remove-Item|rmdir|rm\\s|del\\s|rd\\s|Delete-Item|shutil\\.rmtree",
+        "type": "prompt",
+        "prompt": "This shell command may DELETE files or folders. DENY unless the user's latest message explicitly approved deleting these exact paths. Bulk deletes, recursive deletes (-Recurse, -rf, /s), and 'clean up everything' commands must be DENIED unless the user listed every path. When in doubt, DENY. Hook input: $ARGUMENTS",
+        "timeout": 15,
+        "failClosed": true
+      }
+    ]
+  }
+}
